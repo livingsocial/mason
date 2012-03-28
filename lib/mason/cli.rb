@@ -25,6 +25,8 @@ class Mason::CLI < Thor
   method_option :quiet,     :type => :boolean, :aliases => "-q", :desc => "quiet packaging output"
   method_option :stack,     :type => :string, :aliases => "-s", :desc => "use a stack for building"
   method_option :type,      :type => :string, :aliases => "-t", :desc => "output type (dir, img, tgz)"
+  method_option :buildpack_root, :type => :string, :aliases => "-r",
+    :desc => "Use a location for installed buildpacks different than #{Mason::Buildpacks.root}"
 
   def build(app)
     app = File.expand_path(app)
@@ -61,7 +63,7 @@ class Mason::CLI < Thor
       FileUtils.cp_r app, compile_dir
       FileUtils.cp_r File.expand_path("../../../", __FILE__), mason_dir
 
-      mason_args =  %{ /share/app -q -o /share/output -t #{type} }
+      mason_args =  %{ /share/app -q -o /share/output -t #{type} -r /share/buildpacks }
       mason_args += %{ -b "#{options[:buildpack]}" } if options[:buildpack]
 
       Mason::Stacks.run(stack, <<-COMMAND)
@@ -77,6 +79,7 @@ class Mason::CLI < Thor
       puts "  = location: #{output}"
     else
       print "* detecting buildpack... "
+      Mason::Buildpacks.root = options[:buildpack_root] if options[:buildpack_root]
 
       buildpack, ret = Mason::Buildpacks.detect(app)
       raise "no valid buildpack detected" unless buildpack

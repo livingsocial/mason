@@ -28,8 +28,15 @@ class Mason::Buildpacks
   end
 
   def self.root(expand=true)
-    dir = "~/.mason/buildpacks"
-    expand ? File.expand_path(dir) : dir
+    @root ||= begin
+                dir = "~/.mason/buildpacks"
+                expand ? File.expand_path(dir) : dir
+              end
+  end
+
+  def self.root=(new_root)
+    @buildpacks = nil           # rediscover buildpacks
+    @root = new_root
   end
 
   def self.buildpacks
