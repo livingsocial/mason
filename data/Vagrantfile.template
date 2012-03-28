@@ -1,5 +1,11 @@
 Vagrant::Config.run do |config|
   config.vagrant.dotfile_name = File.expand_path("~/.mason/vagrant")
 
+  # Prettier names for VMs
+  begin
+    require 'mason/vagrant/vm_name'
+    Mason::Vagrant::VMName.install
+  rescue LoadError; end
+
 BOXES
 end
